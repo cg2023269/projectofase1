@@ -1,0 +1,159 @@
+import os  
+import shutil  
+import requests  
+import time  
+import mysql.connector  
+
+
+def conectar_db():  
+    try:  
+        conexion = mysql.connector.connect(  
+            host="10.30.241.154",    
+            user="admin",  
+            password="FranPerez", 
+            database="registro"  
+        )  
+        return conexion  
+    except mysql.connector.Error as err:  
+        print(f"Error: {err}")  
+        return None  
+
+
+def archivo_ya_procesado(nombre_archivo):  
+    conexion = conectar_db()  
+    if conexion:  
+        try:  
+            cursor = conexion.cursor()  
+            consulta = "SELECT COUNT(*) FROM resultados WHERE archivo = %s"  
+            cursor.execute(consulta, (nombre_archivo,))  
+            resultado = cursor.fetchone()[0]  
+            return resultado > 0  
+        except mysql.connector.Error as err:  
+            print(f"Error al consultar la base de datos: {err}")  
+            return False  
+        finally:  
+            cursor.close()  
+            conexion.close()  
+
+
+def subir_archivo_a_virustotal(archivo):  
+    url = 'https://www.virustotal.com/api/v3/files'  
+    headers = {  
+        'x-apikey': 'f14cc7952d80c65551f70f4c9356e33d4019337f7eb76a633b99022c81be7781' 
+    }  
+    with open(archivo, 'rb') as f:  
+        response = requests.post(url, headers=headers, files={'file': f})  
+        return response.json()  
+
+
+def consultar_analisis(analysis_id):  
+    url = f'https://www.virustotal.com/api/v3/analyses/{analysis_id}'  
+    headers = {  
+        'x-apikey': 'f14cc7952d80c65551f70f4c9356e33d4019337f7eb76a633b99022c81be7781'    
+    }  
+    response = requests.get(url, headers=headers)  
+    data = response.json()  
+
+    if data.get('data', {}).get('attributes', {}).get('status') == 'completed':  
+        return data  
+    else:  
+        return None    
+
+
+def tiene_virus(resultados):  
+    if 'data' in resultados and 'attributes' in resultados['data']:  
+        
+        resultados_motores = resultados['data']['attributes']['results']  
+        for motor, resultado in resultados_motores.items():  
+            if resultado.get('category') == 'malicious':  
+                print(f"Motor {motor} detectó el archivo como malicioso.")  
+                return True  
+    return False   
+
+
+def guardar_en_db(archivo, resultado, localizacion):  
+    conexion = conectar_db()  
+    if conexion:  
+        try:  
+            cursor = conexion.cursor()  
+            consulta = "INSERT INTO resultados (archivo, resultado, localizacion) VALUES (%s, %s, %s)"  
+            cursor.execute(consulta, (archivo, resultado, localizacion))  
+            conexion.commit()  
+            print(f"Datos guardados en la base de datos para el archivo {archivo}")  
+        except mysql.connector.Error as err:  
+            print(f"Error al insertar en la base de datos: {err}")  
+        finally:  
+            cursor.close()  
+            conexion.close()  
+
+
+def mover_archivo(archivo, destino):  
+    destino_completo = os.path.join(destino, os.path.basename(archivo))  
+
+    if not os.path.exists(destino_completo):  
+        shutil.move(archivo, destino_completo)  
+        return destino_completo  
+    else:  
+        print(f"El archivo {archivo} ya existe en el destino: {destino}")  
+        return destino_completo   
+
+
+def procesar_archivos(directorio):  
+    carpeta_infectados = os.path.join(directorio, 'infectados')  
+    carpeta_limpios = os.path.join(directorio, 'limpios')  
+
+    os.makedirs(carpeta_infectados, exist_ok=True)  
+    os.makedirs(carpeta_limpios, exist_ok=True)  
+
+    for root, _, files in os.walk(directorio):  
+        if 'infectados' in root or 'limpios' in root:  
+            continue  
+
+        for file in files:  
+            if file.endswith('.exe'):  
+                archivo = os.path.join(root, file)  
+
+                if archivo_ya_procesado(file):  
+                    print(f"El archivo {file} ya ha sido procesado. Se omite.")  
+                    continue    
+
+                print(f"Analizando archivo: {archivo}")  
+
+                 
+                resultado_subida = subir_archivo_a_virustotal(archivo)  
+                analysis_id = resultado_subida.get('data', {}).get('id')  
+
+                if analysis_id:  
+                    print(f"Archivo enviado. ID de análisis: {analysis_id}")  
+
+                    tiempo_maximo_espera = 600    
+                    tiempo_esperado = 0  
+                    intervalo_espera = 15    
+
+                    while tiempo_esperado < tiempo_maximo_espera:  
+                        resultado_analisis = consultar_analisis(analysis_id)  
+
+                        if resultado_analisis:  
+                            if tiene_virus(resultado_analisis):  
+                                nuevo_destino = mover_archivo(archivo, carpeta_infectados)  
+                                guardar_en_db(file, "Infectado", nuevo_destino)  
+                                print(f"Archivo {file} movido a: {nuevo_destino}")  
+                            else:  
+                                nuevo_destino = mover_archivo(archivo, carpeta_limpios)  
+                                guardar_en_db(file, "Limpio", nuevo_destino)  
+                                print(f"Archivo {file} movido a: {nuevo_destino}")  
+                            break    
+                        else:  
+                            print(f"Análisis en progreso para {file}. Esperando {intervalo_espera} segundos...")  
+                            time.sleep(intervalo_espera)  
+                            tiempo_esperado += intervalo_espera  
+
+                    if tiempo_esperado >= tiempo_maximo_espera:  
+                        print(f"El análisis del archivo {file} no se completó en el tiempo esperado.")  
+                else:  
+                    print(f"Error al subir el archivo {file}: {resultado_subida}")  
+
+
+if __name__ == "__main__":  
+    directorio_a_procesar = 'archivos_a_examinar'   
+    procesar_archivos(directorio_a_procesar)
