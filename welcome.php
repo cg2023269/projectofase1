@@ -43,3 +43,52 @@ $username = $_SESSION['username']; // Obtén el nombre de usuario de la sesión
             margin-top: 20px;
         }
 
+.progress-bar {
+            height: 100%;
+            width: 0;
+            background-color: #4caf50;
+            border-radius: 10px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        p {
+            color: #666;
+        }
+    </style>
+    <script>
+        // Función para redirigir a index.html después de 5 segundos
+        setTimeout(function() {
+            window.location.href = "index.html";
+        }, 3000); // 3000 ms = 5 segundos
+
+        // Función para simular la barra de carga
+        let width = 0;
+        function move() {
+            if (width >= 100) {
+                clearInterval(id);
+            } else {
+                width++;
+                document.getElementById("progress-bar").style.width = width + "%";
+            }
+        }
+        let id = setInterval(move, 30); // 50ms para llenar la barra lentamente
+    </script>
+</head>
+<body>
+    <div class="welcome-container">
+        <h1>¡Bienvenido, <?php echo htmlspecialchars($username); ?>!</h1>
+        <p>Serás redirigido al inicio en breve...</p>
+
+        <!-- Barra de carga -->
+        <div class="progress-bar-container">
+            <div id="progress-bar" class="progress-bar"></div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+
