@@ -174,3 +174,120 @@
                 <input type="file" id="fileInput" style="display:none;">
                 <button id="uploadButton">Examinar</button>
                 <button id="submitButton">Subir</button>
+         </div>
+        </div>
+        <div class="section">
+            <h2>Resultados</h2>
+            <div class="results">
+                <div>
+                    <p><strong>Nombre:</strong> archivo1.exe</p>
+                    <p><strong>Tipo:</strong> Ejecutable</p>
+                    <p><strong>Tamaño:</strong> 4.5 MB</p>
+                    <p><strong>Fecha de análisis:</strong> 2024-12-02</p>
+                    <p><strong>Estado:</strong> Malicioso</p>
+                </div>
+                <div>
+                    <canvas id="virusGauge"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Información adicional</h2>
+            <div class="info-item">
+                <span>Detección 1:</span>
+                <p>Virus detectado en sección 3 del archivo.</p>
+            </div>
+            <div class="info-item">
+                <span>Detección 2:</span>
+                <p>Análisis heura­stico muestra comportamiento sospechoso.</p>
+            </div>
+            <div class="info-item">
+                <span>Detección 3:</span>
+                <p>Hash del archivo coincide con base de datos de malware.</p>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Script para mostrar el archivo seleccionado
+        document.getElementById("uploadButton").addEventListener("click", function() {
+            document.getElementById("fileInput").click();
+        });
+
+        // Subir el archivo y actualizar los registros
+        document.getElementById("submitButton").addEventListener("click", function() {
+            const fileInput = document.getElementById("fileInput");
+            const file = fileInput.files[0];
+
+            if (file) {
+                const formData = new FormData();
+                formData.append("file", file);
+
+                fetch('/subir', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        alert(data.message);
+                        actualizarRegistros();
+                    }
+                })
+                .catch(error => console.error('Error al subir el archivo:', error));
+            } else {
+                alert('Por favor, selecciona un archivo primero.');
+            }
+        });
+
+        // FunciÃ³n para actualizar los registros
+        function actualizarRegistros() {
+            fetch('/registros')
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.querySelector('.records-table tbody');
+                    tableBody.innerHTML = ''; // Limpiar registros anteriores
+
+                    data.forEach(registro => {
+                        const row = `
+                            <tr>
+                                <td>${registro.archivo}</td>
+                                <td>${registro.resultado}</td>
+                                <td>${registro.localizacion}</td>
+                            </tr>
+                        `;
+                        tableBody.innerHTML += row;
+                    });
+                })
+                .catch(error => console.error('Error al obtener registros:', error));
+        }
+
+        // Actualizar registros al cargar la pÃ¡gina
+        document.addEventListener('DOMContentLoaded', actualizarRegistros);
+
+        // ConfiguraciÃ³n del grÃ¡fico de Chart.js
+        const ctx = document.getElementById('virusGauge').getContext('2d');
+        const data = {
+            datasets: [{
+                data: [40, 60],
+                backgroundColor: ['#1abc9c', '#e74c3c']
+            }]
+        };
+        const config = {
+            type: 'doughnut',
+            data: data,
+            options: {
+                plugins: {
+                    tooltip: { enabled: false },
+                    legend: { display: false }
+                },
+                cutout: '75%',
+                responsive: true
+            }
+        };
+        new Chart(ctx, config);
+    </script>
+</body>
+</html>
+
