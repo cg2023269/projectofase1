@@ -243,25 +243,30 @@
 
         // FunciÃ³n para actualizar los registros
         function actualizarRegistros() {
-            fetch('/registros')
-                .then(response => response.json())
-                .then(data => {
-                    const tableBody = document.querySelector('.records-table tbody');
-                    tableBody.innerHTML = ''; // Limpiar registros anteriores
+    fetch('/registros')
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.querySelector('.records-table tbody');
+            tableBody.innerHTML = ''; // Limpiar registros anteriores
 
-                    data.forEach(registro => {
-                        const row = `
-                            <tr>
-                                <td>${registro.archivo}</td>
-                                <td>${registro.resultado}</td>
-                                <td>${registro.localizacion}</td>
-                            </tr>
-                        `;
-                        tableBody.innerHTML += row;
-                    });
-                })
-                .catch(error => console.error('Error al obtener registros:', error));
-        }
+            data.forEach(registro => {
+                const row = `
+                    <tr>
+                        <td>${registro.archivo}</td>
+                        <td>${registro.resultado}</td>
+                        <td>${registro.localizacion}</td>
+                        <td>
+                            <button>Eliminar</button>
+                            <button>Descargar</button>
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+        })
+        .catch(error => console.error('Error al obtener registros:', error));
+}
+
 
         // Actualizar registros al cargar la pÃ¡gina
         document.addEventListener('DOMContentLoaded', actualizarRegistros);
