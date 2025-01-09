@@ -8,7 +8,7 @@ import mysql.connector
 def conectar_db():  
     try:  
         conexion = mysql.connector.connect(  
-            host="10.30.241.156",    
+            host="10.30.241.174",    
             user="admin",  
             password="FranPerez", 
             database="registro"  
