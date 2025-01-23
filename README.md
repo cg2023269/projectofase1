@@ -1,6 +1,11 @@
+README.md
+markdown
+Copy
 # Proyecto Antiv FA
 
 Este proyecto es una aplicación web para analizar archivos en busca de virus utilizando la API de VirusTotal. A continuación, se detallan los pasos para instalar y ejecutar la aplicación en un servidor Ubuntu con Apache2.
+
+---
 
 ## Requisitos
 
@@ -8,13 +13,15 @@ Este proyecto es una aplicación web para analizar archivos en busca de virus ut
 - **Servidor web**: Apache2.
 - **Acceso a Internet**: Para usar la API de VirusTotal.
 
+---
+
 ## Pasos de instalación
 
 ### 1. Clonar el repositorio
 
 Primero, clona el repositorio en tu servidor:
 
-´´´bash
+```bash
 git clone https://github.com/cg2023259/projectofasel.git
 cd projectofasel
 2. Cambiar a la rama fase0_final
@@ -103,3 +110,5 @@ sudo chown -R www-data:www-data /var/www/html/viruscheck
 sudo chmod -R 755 /var/www/html/viruscheck
 3. Si ves un error 404 (No encontrado)
 Asegúrate de que el archivo index.html esté en la carpeta correcta (/var/www/html/viruscheck/).
+
+
