@@ -19,7 +19,7 @@ Este proyecto es una aplicación web para analizar archivos en busca de virus ut
 Primero, clona el repositorio en tu servidor. Para ello, abre una terminal y ejecuta el siguiente comando:
 
 ```bash
-git clone https://github.com/cg2023259/projectofasel.git
+git clone https://github.com/cg2023269/projectofasel.git
 cd projectofasel
 ```
 
@@ -143,5 +143,5 @@ Asegúrate de que el archivo `index.html` esté en la carpeta correcta (`/var/ww
 
 ## 🎉 **¡Listo!**
 
-Ahora tienes una aplicación funcional para analizar archivos en busca de virus. ¡Disfruta de tu herramienta de seguridad! 🚀
+Siguiendo esta guia deberias poder acceder y usar todas las funciones disponibles de la web. 🚀
 
