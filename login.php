@@ -1,9 +1,9 @@
 <?php
 // Configuración de conexión a la base de datos
 $servidor = "10.30.241.174";
-$usuario = "admin"; 
-$contrasena = "FranPerez"; 
-$base_datos = "registro"; 
+$usuario = "admin";
+$contrasena = "FranPerez";
+$base_datos = "registro";
 
 // Crear conexión
 $conn = new mysqli($servidor, $usuario, $contrasena, $base_datos);
