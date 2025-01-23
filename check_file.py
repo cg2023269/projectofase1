@@ -1,9 +1,10 @@
 #!/usr/bin/python3
-
 import cgi
 import os
 import hashlib
 import requests
+import json
+import time
 
 # Ruta donde se guardarán los archivos subidos
 UPLOAD_FOLDER = '/var/www/html/viruscheck/uploads/'
@@ -20,25 +21,44 @@ def get_file_hash(file_path):
     return sha256_hash.hexdigest()
 
 # Función para comprobar el archivo con VirusTotal usando el hash
-def check_file_with_virustotal(file_hash):
+def check_file_with_virustotal(file_hash, file_path):
     url = f'https://www.virustotal.com/api/v3/files/{file_hash}'
     headers = {'x-apikey': API_KEY}
 
-    response = requests.get(url, headers=headers)
+    # Intentar obtener el análisis varias veces
+    max_retries = 5  # Número máximo de reintentos
+    retry_delay = 10  # Segundos entre reintentos
 
-    if response.status_code == 200:
-        result = response.json()
-        # Extraer resultados del análisis
-        scan_results = result['data']['attributes']['last_analysis_results']
+    for attempt in range(max_retries):
+        response = requests.get(url, headers=headers)
 
-        # Revisar si algún motor marcó el archivo como malicioso
-        for engine, analysis in scan_results.items():
-            if analysis['category'] == 'malicious':
-                return "infected"
+        if response.status_code == 200:
+            result = response.json()
+            # Extraer resultados del análisis
+            scan_results = result['data']['attributes']['last_analysis_results']
 
-        return "clean"
-    else:
-        return f"Error en la consulta: {response.status_code}"
+            # Revisar si algún motor marcó el archivo como malicioso
+            for engine, analysis in scan_results.items():
+                if analysis['category'] == 'malicious':
+                    return "infected"
+
+            return "clean"
+        elif response.status_code == 404:
+            # El archivo no ha sido analizado previamente, subirlo para análisis
+            upload_url = 'https://www.virustotal.com/api/v3/files'
+            files = {'file': open(file_path, 'rb')}
+            upload_response = requests.post(upload_url, headers=headers, files=files)
+
+            if upload_response.status_code == 200:
+                # Esperar antes de reintentar
+                time.sleep(retry_delay)
+                continue
+            else:
+                return f"Error al subir el archivo: {upload_response.status_code}"
+        else:
+            return f"Error en la consulta: {response.status_code}"
+
+    return "El análisis no ha finalizado después de varios intentos."
 
 # Crear directorio de subida si no existe
 if not os.path.exists(UPLOAD_FOLDER):
@@ -49,8 +69,8 @@ form = cgi.FieldStorage()
 
 # Comprobar si se ha recibido el archivo
 if "file" not in form:
-    print("Content-Type: text/html\n")
-    print("<h1>No se ha recibido ningún archivo.</h1>")
+    print("Content-Type: application/json\n")
+    print(json.dumps({"error": "No se ha recibido ningún archivo."}))
 else:
     uploaded_file = form["file"]
 
@@ -62,20 +82,11 @@ else:
             with open(file_path, 'wb') as f:
                 f.write(uploaded_file.file.read())
 
-            print("Content-Type: text/html\n")
-            print(f"<h1>Archivo recibido: {uploaded_file.filename}</h1>")
-            print(f"<p>Archivo guardado en: {file_path}</p>")
-
             # Obtener el hash del archivo
             file_hash = get_file_hash(file_path)
-            print(f"<p>Hash del archivo (SHA256): {file_hash}</p>")
 
             # Comprobar el archivo con VirusTotal
-            print("<p>Realizando la llamada a la API de VirusTotal...</p>")
-            status = check_file_with_virustotal(file_hash)
-
-            # Mostrar el resultado del análisis
-            print(f"<h2>Resultado del análisis: {status}</h2>")
+            status = check_file_with_virustotal(file_hash, file_path)
 
             # Mover el archivo a la carpeta correspondiente según el estado
             if status == "infected":
@@ -83,15 +94,28 @@ else:
                 if not os.path.exists(infected_folder):
                     os.makedirs(infected_folder)
                 os.rename(file_path, os.path.join(infected_folder, uploaded_file.filename))
-                print(f"<p>El archivo se ha movido a la carpeta de infectados: {infected_folder}</p>")
-            else:
+                location = infected_folder
+            elif status == "clean":
                 clean_folder = '/var/www/html/viruscheck/clean/'
                 if not os.path.exists(clean_folder):
                     os.makedirs(clean_folder)
                 os.rename(file_path, os.path.join(clean_folder, uploaded_file.filename))
-                print(f"<p>El archivo se ha movido a la carpeta limpia: {clean_folder}</p>")
+                location = clean_folder
+            else:
+                location = UPLOAD_FOLDER
+
+            # Devolver la respuesta en formato JSON
+            print("Content-Type: application/json\n")
+            print(json.dumps({
+                "file_name": uploaded_file.filename,
+                "hash": file_hash,
+                "status": status,
+                "location": location
+            }))
 
         except Exception as e:
-            print(f"<h1>Error al guardar el archivo: {str(e)}</h1>")
+            print("Content-Type: application/json\n")
+            print(json.dumps({"error": f"Error al guardar el archivo: {str(e)}"}))
     else:
-        print("<h1>No se ha seleccionado un archivo.</h1>")
+        print("Content-Type: application/json\n")
+        print(json.dumps({"error": "No se ha seleccionado un archivo."}))
