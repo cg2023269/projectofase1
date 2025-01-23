@@ -75,8 +75,46 @@ ScriptAlias /cgi-bin/ /var/www/html/viruscheck/cgi-bin/
 </Directory>
 EOF'
 
+# Crear un VirtualHost para la aplicación
+echo "Configurando VirtualHost para la aplicación..."
+sudo bash -c 'cat > /etc/apache2/sites-available/viruscheck.conf <<EOF
+<VirtualHost *:80>
+    # Directorio raíz de la aplicación
+    DocumentRoot /var/www/html/viruscheck
+
+    # Nombre del dominio o IP (puedes usar la IP del servidor)
+    ServerName localhost
+
+    # Configuración del directorio principal
+    <Directory /var/www/html/viruscheck>
+        Options Indexes FollowSymLinks
+        AllowOverride None
+        Require all granted
+    </Directory>
+
+    # Configuración para CGI
+    ScriptAlias /cgi-bin/ /var/www/html/viruscheck/cgi-bin/
+    <Directory "/var/www/html/viruscheck/cgi-bin">
+        AllowOverride None
+        Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch
+        Require all granted
+    </Directory>
+
+    # Archivo de índice por defecto
+    DirectoryIndex index.html
+</VirtualHost>
+EOF'
+
 # Habilitar la configuración de VirusCheck
 sudo a2enconf viruscheck
+sudo a2ensite viruscheck.conf
+
+# Deshabilitar el sitio por defecto de Apache
+echo "Deshabilitando el sitio por defecto de Apache..."
+sudo a2dissite 000-default.conf
+
+# Reiniciar Apache
+echo "Reiniciando Apache..."
 sudo systemctl restart apache2
 
 echo "¡Instalación completada!"
