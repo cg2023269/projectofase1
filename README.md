@@ -21,6 +21,7 @@ Primero, clona el repositorio en tu servidor:
 ```bash
 git clone https://github.com/cg2023259/projectofasel.git
 cd projectofasel
+
 ```
 
 ```bash
