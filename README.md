@@ -110,3 +110,4 @@ sudo chmod -R 755 /var/www/html/viruscheck
 3. Si ves un error 404 (No encontrado)
 Asegúrate de que el archivo index.html esté en la carpeta correcta (/var/www/html/viruscheck/).
 
+
