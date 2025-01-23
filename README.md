@@ -70,8 +70,6 @@ http://<tu-ip>/viruscheck/
 Estructura del proyecto
 El proyecto está organizado de la siguiente manera:
 
-```
-
 /var/www/html/viruscheck/
 ├── cgi-bin/
 │   └── check_file.py
@@ -85,6 +83,9 @@ El proyecto está organizado de la siguiente manera:
 │   ├── signup.html
 │   └── welcome.php
 ├── uploads/
+
+```
+
 Uso de la aplicación
 Subir un archivo:
 
