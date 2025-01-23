@@ -20,13 +20,15 @@ Primero, clona el repositorio en tu servidor:
 
 ```bash
 git clone https://github.com/cg2023259/projectofasel.git
+
 cd projectofasel
-2. Cambiar a la rama fase0_final
+
+### 2. Cambiar a la rama fase0_final
 El proyecto está en la rama fase0_final. Cambia a esta rama con el siguiente comando:
 
 
 git checkout fase0_final
-3. Ejecutar el script de instalación
+### 3. Ejecutar el script de instalación
 El proyecto incluye un script de instalación (install.sh) que automatiza la configuración del servidor. Ejecuta el siguiente comando para iniciar la instalación:
 
 
@@ -49,7 +51,7 @@ Instala las dependencias de Python (como requests) usando pipx.
 
 Deshabilita el sitio por defecto de Apache y habilita el nuevo sitio (viruscheck.conf).
 
-4. Acceder a la aplicación
+### 4. Acceder a la aplicación
 Una vez que la instalación haya finalizado, puedes acceder a la aplicación desde un navegador web:
 
 Localmente: Abre tu navegador y visita:
