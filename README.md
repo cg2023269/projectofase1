@@ -23,6 +23,7 @@ git clone https://github.com/cg2023259/projectofasel.git
 
 cd projectofasel
 
+```bash
 ### 2. Cambiar a la rama fase0_final
 El proyecto está en la rama fase0_final. Cambia a esta rama con el siguiente comando:
 
