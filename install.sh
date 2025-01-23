@@ -55,10 +55,14 @@ sudo cp check_file.py /var/www/html/viruscheck/cgi-bin/
 # Asignar permisos al script CGI
 sudo chmod +x /var/www/html/viruscheck/cgi-bin/check_file.py
 
-# Instalar dependencias de Python
-echo "Instalando dependencias de Python..."
-sudo apt install python3-pip -y
-sudo pip3 install requests
+# Instalar pipx
+echo "Instalando pipx..."
+sudo apt install pipx -y
+pipx ensurepath
+
+# Instalar requests con pipx
+echo "Instalando requests con pipx..."
+pipx install requests
 
 # Configurar Apache2 para permitir la ejecución de scripts CGI
 echo "Configurando Apache2 para CGI..."
