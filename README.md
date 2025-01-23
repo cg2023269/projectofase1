@@ -14,7 +14,7 @@ Este proyecto es una aplicación web para analizar archivos en busca de virus ut
 
 Primero, clona el repositorio en tu servidor:
 
-bash
+'''bash
 git clone https://github.com/cg2023259/projectofasel.git
 cd projectofasel
 2. Cambiar a la rama fase0_final
