@@ -25,7 +25,7 @@ cd projectofasel
 ```
 
 ```bash
-### 2. Cambiar a la rama fase0_final
+### 2. Cambiar a la rama fase0_fina
 El proyecto está en la rama fase0_final. Cambia a esta rama con el siguiente comando:
 
 git checkout fase0_final
