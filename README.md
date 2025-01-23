@@ -1,6 +1,3 @@
-README.md
-markdown
-Copy
 # Proyecto Antiv FA
 
 Este proyecto es una aplicación web para analizar archivos en busca de virus utilizando la API de VirusTotal. A continuación, se detallan los pasos para instalar y ejecutar la aplicación en un servidor Ubuntu con Apache2.
@@ -27,14 +24,12 @@ cd projectofasel
 2. Cambiar a la rama fase0_final
 El proyecto está en la rama fase0_final. Cambia a esta rama con el siguiente comando:
 
-bash
-Copy
+
 git checkout fase0_final
 3. Ejecutar el script de instalación
 El proyecto incluye un script de instalación (install.sh) que automatiza la configuración del servidor. Ejecuta el siguiente comando para iniciar la instalación:
 
-bash
-Copy
+
 chmod +x install.sh  # Dar permisos de ejecución al script
 sudo ./install.sh    # Ejecutar el script de instalación
 ¿Qué hace el script de instalación?
@@ -59,16 +54,16 @@ Una vez que la instalación haya finalizado, puedes acceder a la aplicación des
 
 Localmente: Abre tu navegador y visita:
 
-Copy
+
 http://localhost/viruscheck/
 Desde otro dispositivo: Usa la IP del servidor:
 
-Copy
+
 http://<tu-ip>/viruscheck/
 Estructura del proyecto
 El proyecto está organizado de la siguiente manera:
 
-Copy
+
 /var/www/html/viruscheck/
 ├── cgi-bin/
 │   └── check_file.py
@@ -97,15 +92,15 @@ Solución de problemas
 1. Si aparece la página por defecto de Apache
 Asegúrate de que el sitio por defecto esté deshabilitado:
 
-bash
-Copy
+
+
 sudo a2dissite 000-default.conf
 sudo systemctl restart apache2
 2. Si ves un error 403 (Prohibido)
 Verifica los permisos de los archivos y directorios:
 
-bash
-Copy
+
+
 sudo chown -R www-data:www-data /var/www/html/viruscheck
 sudo chmod -R 755 /var/www/html/viruscheck
 3. Si ves un error 404 (No encontrado)
