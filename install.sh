@@ -120,20 +120,24 @@ sudo systemctl restart apache2
 # Configurar MariaDB
 echo "Configurando MariaDB..."
 
-# Eliminar el usuario root existente
-echo "Eliminando el usuario root existente..."
-sudo mysql -u root -e "DROP USER IF EXISTS 'root'@'localhost';"
+# Crear la base de datos y la tabla de usuarios
+sudo mysql -u root <<EOF
+CREATE DATABASE usuarios;
+USE usuarios;
+CREATE TABLE usuarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    correo VARCHAR(255) NOT NULL UNIQUE,
+    contraseña VARCHAR(255) NOT NULL
+);
+CREATE USER 'admin'@'localhost' IDENTIFIED BY 'FranPerez';
+GRANT ALL PRIVILEGES ON usuarios.* TO 'admin'@'localhost';
+FLUSH PRIVILEGES;
+EOF
 
-# Crear un nuevo usuario root con todos los privilegios
-echo "Creando un nuevo usuario root con todos los privilegios..."
-sudo mysql -u root -e "CREATE USER 'root'@'localhost' IDENTIFIED BY 'FranPerez';"
-sudo mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;"
-sudo mysql -u root -e "FLUSH PRIVILEGES;"
-
-# Crear la base de datos 'usuarios' y la tabla 'usuarios'
-echo "Creando la base de datos 'usuarios' y la tabla 'usuarios'..."
-sudo mysql -u root -pFranPerez -e "CREATE DATABASE usuarios;"
-sudo mysql -u root -pFranPerez -e "USE usuarios; CREATE TABLE usuarios (id INT AUTO_INCREMENT PRIMARY KEY, nombre VARCHAR(255) NOT NULL, correo VARCHAR(255) NOT NULL, contraseña VARCHAR(255) NOT NULL);"
+# Asegurar la instalación de MariaDB
+echo "Asegurando la instalación de MariaDB..."
+sudo mysql_secure_installation
 
 echo "¡Instalación completada!"
 echo "Accede a la aplicación en: http://localhost/viruscheck/"
