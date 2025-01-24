@@ -5,7 +5,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $correo = $_POST['correo'];
     $contraseña = $_POST['contraseña'];
 
-    $conn = new mysqli('localhost', 'root', 'FranPerez', 'usuarios');
+    $conn = new mysqli('localhost', 'admin', 'FranPerez', 'usuarios');
 
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
