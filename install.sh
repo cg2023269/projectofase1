@@ -6,9 +6,9 @@
 echo "Actualizando el sistema..."
 sudo apt update && sudo apt upgrade -y
 
-# Instalar Apache2 y PHP
-echo "Instalando Apache2 y PHP..."
-sudo apt install apache2 php libapache2-mod-php -y
+# Instalar Apache2, PHP y MariaDB
+echo "Instalando Apache2, PHP y MariaDB..."
+sudo apt install apache2 php libapache2-mod-php mariadb-server php-mysql -y
 
 # Habilitar el módulo CGI de Apache2
 echo "Habilitando el módulo CGI..."
@@ -116,6 +116,22 @@ sudo a2dissite 000-default.conf
 # Reiniciar Apache
 echo "Reiniciando Apache..."
 sudo systemctl restart apache2
+
+# Configurar MariaDB
+echo "Configurando MariaDB..."
+sudo mysql -e "CREATE DATABASE usuarios;"
+sudo mysql -e "CREATE USER 'root'@'localhost' IDENTIFIED BY 'FranPerez';"
+sudo mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;"
+sudo mysql -e "FLUSH PRIVILEGES;"
+
+# Crear la tabla usuarios
+echo "Creando la tabla usuarios..."
+sudo mysql -e "USE usuarios; CREATE TABLE usuarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    correo VARCHAR(255) NOT NULL,
+    contraseña VARCHAR(255) NOT NULL
+);"
 
 echo "¡Instalación completada!"
 echo "Accede a la aplicación en: http://localhost/viruscheck/"
