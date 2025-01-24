@@ -49,6 +49,7 @@ El proyecto incluye un script de instalación (`install.sh`) que automatiza la c
    ```bash
    sudo ./install.sh
    ```
+   Es problable que al realizar la descarga de los elementos pida permisos por teclado (Y/N), se recomienda marcar todo con "N".
 
 #### ¿Qué hace el script de instalación?
 El script realiza las siguientes tareas:
