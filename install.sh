@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script de instalación para Antiv FA en Ubuntu con Apache2
+# Script de instalación para Antiv FA en Ubuntu con Apache2 y MariaDB
 
 # Actualizar el sistema
 echo "Actualizando el sistema..."
@@ -117,21 +117,23 @@ sudo a2dissite 000-default.conf
 echo "Reiniciando Apache..."
 sudo systemctl restart apache2
 
-# Configurar MariaDB
+# Configuración de MariaDB
 echo "Configurando MariaDB..."
-sudo mysql -e "CREATE DATABASE usuarios;"
-sudo mysql -e "CREATE USER 'root'@'localhost' IDENTIFIED BY 'FranPerez';"
-sudo mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;"
-sudo mysql -e "FLUSH PRIVILEGES;"
 
-# Crear la tabla usuarios
-echo "Creando la tabla usuarios..."
-sudo mysql -e "USE usuarios; CREATE TABLE usuarios (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(255) NOT NULL,
-    correo VARCHAR(255) NOT NULL,
-    contraseña VARCHAR(255) NOT NULL
-);"
+# Eliminar el usuario root existente
+echo "Eliminando el usuario root existente..."
+sudo mysql -u root -e "DROP USER IF EXISTS 'root'@'localhost';"
+
+# Crear un nuevo usuario root con todos los privilegios
+echo "Creando nuevo usuario root..."
+sudo mysql -u root -e "CREATE USER 'root'@'localhost' IDENTIFIED BY 'FranPerez';"
+sudo mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;"
+sudo mysql -u root -e "FLUSH PRIVILEGES;"
+
+# Crear la base de datos y la tabla de usuarios
+echo "Creando base de datos y tabla de usuarios..."
+sudo mysql -u root -pFranPerez -e "CREATE DATABASE usuarios;"
+sudo mysql -u root -pFranPerez -e "USE usuarios; CREATE TABLE usuarios (id INT AUTO_INCREMENT PRIMARY KEY, nombre VARCHAR(255) NOT NULL, correo VARCHAR(255) NOT NULL, contraseña VARCHAR(255) NOT NULL);"
 
 echo "¡Instalación completada!"
 echo "Accede a la aplicación en: http://localhost/viruscheck/"
