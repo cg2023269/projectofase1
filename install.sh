@@ -117,7 +117,7 @@ sudo a2dissite 000-default.conf
 echo "Reiniciando Apache..."
 sudo systemctl restart apache2
 
-# Configuración de MariaDB
+# Configurar MariaDB
 echo "Configurando MariaDB..."
 
 # Eliminar el usuario root existente
@@ -125,13 +125,13 @@ echo "Eliminando el usuario root existente..."
 sudo mysql -u root -e "DROP USER IF EXISTS 'root'@'localhost';"
 
 # Crear un nuevo usuario root con todos los privilegios
-echo "Creando nuevo usuario root..."
+echo "Creando un nuevo usuario root con todos los privilegios..."
 sudo mysql -u root -e "CREATE USER 'root'@'localhost' IDENTIFIED BY 'FranPerez';"
 sudo mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;"
 sudo mysql -u root -e "FLUSH PRIVILEGES;"
 
-# Crear la base de datos y la tabla de usuarios
-echo "Creando base de datos y tabla de usuarios..."
+# Crear la base de datos 'usuarios' y la tabla 'usuarios'
+echo "Creando la base de datos 'usuarios' y la tabla 'usuarios'..."
 sudo mysql -u root -pFranPerez -e "CREATE DATABASE usuarios;"
 sudo mysql -u root -pFranPerez -e "USE usuarios; CREATE TABLE usuarios (id INT AUTO_INCREMENT PRIMARY KEY, nombre VARCHAR(255) NOT NULL, correo VARCHAR(255) NOT NULL, contraseña VARCHAR(255) NOT NULL);"
 
