@@ -1,7 +1,3 @@
-Aquí tienes una versión mejorada y actualizada de tu archivo `README.md`, incluyendo la información adicional sobre la instalación con el archivo ZIP y los detalles completos de lo que hace el script `install.sh`. He reorganizado y mejorado la redacción para que sea más clara y profesional.
-
----
-
 # 🛡️ Proyecto Antiv FA 🛡️
 
 Este proyecto es una aplicación web para analizar archivos en busca de virus utilizando la API de VirusTotal. A continuación, se detallan los pasos para instalar y ejecutar la aplicación en un servidor Ubuntu con Apache2.
@@ -152,10 +148,8 @@ El proyecto está organizado de la siguiente manera:
 ├── index.html
 ├── infected/
 ├── login/
-│   ├── login.html
 │   ├── login.php
 │   ├── register.php
-│   ├── signup.html
 │   └── welcome.php
 ├── uploads/
 ```
@@ -198,6 +192,4 @@ Asegúrate de que el archivo `index.html` esté en la carpeta correcta (`/var/ww
 ## 🎉 ¡Listo!
 Siguiendo esta guía, deberías poder acceder y usar todas las funciones disponibles de la aplicación. 🚀
 
----
 
-Espero que esta versión sea de tu agrado. Si necesitas más ajustes o detalles adicionales, ¡no dudes en decírmelo! 😊
