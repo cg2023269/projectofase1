@@ -69,6 +69,11 @@
         .results p {
             margin: 5px 0;
         }
+        .loading {
+            display: none;
+            color: #2c3e50;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -77,23 +82,24 @@
         <h1>Antiv FA</h1>
     </header>
     <nav>
-        <a href="login/login.html">Login</a>
-        <a href="login/signup.html">Sign Up</a>
+        <a href="login/login.php">Login</a>
+        <a href="login/register.php">signup</a>
         <a href="login/registros.html">Registros</a>
     </nav>
     <div class="container">
         <div class="section">
             <h2>Subir y Analizar Archivos</h2>
-            <form action="#" method="post" enctype="multipart/form-data">
+            <form id="uploadForm" method="post" enctype="multipart/form-data">
                 <label for="file">Seleccione un archivo:</label>
                 <input type="file" id="file" name="file" required>
                 <button type="submit">Subir y analizar</button>
             </form>
+            <div class="loading" id="loading">Analizando archivo, por favor espere...</div>
         </div>
         <div class="section">
             <h2>Resultados</h2>
             <div class="results">
-                <div>
+                <div id="resultsContent">
                     <p><strong>Nombre del archivo:</strong> --</p>
                     <p><strong>Hash (SHA256):</strong> --</p>
                     <p><strong>Estado:</strong> --</p>
@@ -104,8 +110,9 @@
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const form = document.querySelector('form');
-            const resultsDiv = document.querySelector('.results div');
+            const form = document.getElementById('uploadForm');
+            const resultsDiv = document.getElementById('resultsContent');
+            const loadingDiv = document.getElementById('loading');
 
             form.addEventListener('submit', async (event) => {
                 event.preventDefault();
@@ -116,6 +123,9 @@
                     alert('Por favor, seleccione un archivo.');
                     return;
                 }
+
+                // Mostrar mensaje de carga
+                loadingDiv.style.display = 'block';
 
                 const formData = new FormData();
                 formData.append('file', file);
@@ -144,6 +154,9 @@
                     }
                 } catch (error) {
                     resultsDiv.innerHTML = `<p><strong>Error:</strong> ${error.message}</p>`;
+                } finally {
+                    // Ocultar mensaje de carga
+                    loadingDiv.style.display = 'none';
                 }
             });
         });
