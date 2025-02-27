@@ -44,13 +44,25 @@ sudo chmod -R 755 /var/www/html/viruscheck/login
 
 # Copiar archivos del proyecto
 echo "Copiando archivos del proyecto..."
-sudo cp index.html /var/www/html/viruscheck/
+sudo cp index.php /var/www/html/viruscheck/  # Cambiado de index.html a index.php
 sudo cp login.html /var/www/html/viruscheck/login/
 sudo cp login.php /var/www/html/viruscheck/login/
 sudo cp register.php /var/www/html/viruscheck/login/
 sudo cp signup.html /var/www/html/viruscheck/login/
 sudo cp welcome.php /var/www/html/viruscheck/login/
 sudo cp check_file.py /var/www/html/viruscheck/cgi-bin/
+
+# Copiar los nuevos archivos PHP
+echo "Copiando nuevos archivos PHP..."
+sudo cp admin.php /var/www/html/viruscheck/
+sudo cp archivos_compartidos.php /var/www/html/viruscheck/
+sudo cp delete.php /var/www/html/viruscheck/
+sudo cp download.php /var/www/html/viruscheck/
+sudo cp historial.php /var/www/html/viruscheck/
+sudo cp logout.php /var/www/html/viruscheck/
+sudo cp registro.php /var/www/html/viruscheck/
+sudo cp save_record.php /var/www/html/viruscheck/
+sudo cp share.php /var/www/html/viruscheck/
 
 # Asignar permisos al script CGI
 sudo chmod +x /var/www/html/viruscheck/cgi-bin/check_file.py
@@ -101,7 +113,7 @@ sudo bash -c 'cat > /etc/apache2/sites-available/viruscheck.conf <<EOF
     </Directory>
 
     # Archivo de índice por defecto
-    DirectoryIndex index.html
+    DirectoryIndex index.php  # Cambiado de index.html a index.php
 </VirtualHost>
 EOF'
 
@@ -120,16 +132,54 @@ sudo systemctl restart apache2
 # Configurar MariaDB
 echo "Configurando MariaDB..."
 
-# Crear la base de datos y la tabla de usuarios
+# Crear la base de datos y las tablas
 sudo mysql -u root <<EOF
 CREATE DATABASE usuarios;
 USE usuarios;
+
+-- Tabla de usuarios
 CREATE TABLE usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL,
     correo VARCHAR(255) NOT NULL UNIQUE,
-    contraseña VARCHAR(255) NOT NULL
+    contraseña VARCHAR(255) NOT NULL,
+    departamento VARCHAR(50)
 );
+
+-- Tabla de archivos
+CREATE TABLE archivos (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    usuario VARCHAR(255) NOT NULL,
+    file_name VARCHAR(255) NOT NULL,
+    hash VARCHAR(64) NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    upload_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    almacenado ENUM('Sí', 'No') NOT NULL
+);
+
+-- Tabla de archivos compartidos
+CREATE TABLE archivos_compartidos (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    archivo_id INT(11) NOT NULL,
+    usuario_destinatario VARCHAR(255) NOT NULL,
+    departamento_destinatario VARCHAR(50) NOT NULL,
+    compartido_por VARCHAR(255) NOT NULL,
+    fecha_compartido TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    estado ENUM('Pendiente', 'Completado') DEFAULT 'Pendiente'
+);
+
+-- Tabla de departamentos
+CREATE TABLE departamentos (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL
+);
+
+-- Crear usuario administrador
+INSERT INTO usuarios (nombre, correo, contraseña, departamento) 
+VALUES ('Administrador', 'admin@example.com', 'admin123', 'administrador');
+
+-- Crear usuario de base de datos y asignar permisos
 CREATE USER 'admin'@'localhost' IDENTIFIED BY 'FranPerez';
 GRANT ALL PRIVILEGES ON usuarios.* TO 'admin'@'localhost';
 FLUSH PRIVILEGES;
