@@ -60,7 +60,7 @@ $username = $_SESSION['username']; // Obtén el nombre de usuario de la sesión
     <script>
         // Función para redirigir a index.html después de 5 segundos
         setTimeout(function() {
-            window.location.href = "../index.html";
+            window.location.href = "../index.php";
         }, 3000); // 3000 ms = 3 segundos
 
         // Función para simular la barra de carga
@@ -88,6 +88,3 @@ $username = $_SESSION['username']; // Obtén el nombre de usuario de la sesión
     </div>
 </body>
 </html>
-
-
-
