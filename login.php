@@ -12,17 +12,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     $conn->set_charset("utf8mb4");
 
-    $stmt = $conn->prepare("SELECT id, nombre, contraseña FROM usuarios WHERE correo = ?");
+    // Actualizamos la consulta para recuperar también el departamento
+    $stmt = $conn->prepare("SELECT id, nombre, contraseña, departamento FROM usuarios WHERE correo = ?");
     $stmt->bind_param("s", $correo);
     $stmt->execute();
     $stmt->store_result();
-    $stmt->bind_result($id, $nombre, $hashed_password);
+    // Se agrego una variable para el departamento
+    $stmt->bind_result($id, $nombre, $hashed_password, $departamento);
 
     if ($stmt->fetch() && password_verify($contraseña, $hashed_password)) {
-        // Guarda el nombre del usuario en la sesión
+        // Guarda el nombre y el departamento del usuario en la sesión
         $_SESSION['username'] = $nombre;
+        $_SESSION['role'] = $departamento; // Ej: "administrador" o "cliente"
 
-        // Redirige a welcome.php
+        // Redirige a welcome.php (o a index.php si prefieres)
         header("Location: welcome.php");
         exit();
     } else {
