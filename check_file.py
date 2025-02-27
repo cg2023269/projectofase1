@@ -5,6 +5,11 @@ import hashlib
 import requests
 import json
 import time
+import sys
+import io
+
+# Configurar codificación de salida
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 # Ruta donde se guardarán los archivos subidos
 UPLOAD_FOLDER = '/var/www/html/viruscheck/uploads/'
@@ -60,62 +65,112 @@ def check_file_with_virustotal(file_hash, file_path):
 
     return "El análisis no ha finalizado después de varios intentos."
 
-# Crear directorio de subida si no existe
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+# Función para procesar un archivo individual
+def process_file(file_item, file_name=None, is_folder=False):
+    try:
+        # Crear directorio de subida si no existe
+        if not os.path.exists(UPLOAD_FOLDER):
+            os.makedirs(UPLOAD_FOLDER)
 
-# Manejo del formulario de subida
-form = cgi.FieldStorage()
+        # Determinar el nombre de archivo
+        if file_name is None:
+            file_name = file_item.filename
 
-# Comprobar si se ha recibido el archivo
-if "file" not in form:
-    print("Content-Type: application/json\n")
-    print(json.dumps({"error": "No se ha recibido ningún archivo."}))
-else:
-    uploaded_file = form["file"]
-
-    if uploaded_file.filename:
         # Guardar el archivo en el servidor
-        file_path = os.path.join(UPLOAD_FOLDER, uploaded_file.filename)
+        file_path = os.path.join(UPLOAD_FOLDER, file_name)
 
-        try:
-            with open(file_path, 'wb') as f:
-                f.write(uploaded_file.file.read())
+        # Asegurar que la estructura de directorios existe
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
-            # Obtener el hash del archivo
-            file_hash = get_file_hash(file_path)
+        with open(file_path, 'wb') as f:
+            f.write(file_item.file.read())
 
-            # Comprobar el archivo con VirusTotal
-            status = check_file_with_virustotal(file_hash, file_path)
+        # Obtener el hash del archivo
+        file_hash = get_file_hash(file_path)
 
-            # Mover el archivo a la carpeta correspondiente según el estado
-            if status == "infected":
-                infected_folder = '/var/www/html/viruscheck/infected/'
-                if not os.path.exists(infected_folder):
-                    os.makedirs(infected_folder)
-                os.rename(file_path, os.path.join(infected_folder, uploaded_file.filename))
-                location = infected_folder
-            elif status == "clean":
-                clean_folder = '/var/www/html/viruscheck/clean/'
-                if not os.path.exists(clean_folder):
-                    os.makedirs(clean_folder)
-                os.rename(file_path, os.path.join(clean_folder, uploaded_file.filename))
-                location = clean_folder
+        # Comprobar el archivo con VirusTotal
+        status = check_file_with_virustotal(file_hash, file_path)
+
+        # Mover el archivo a la carpeta correspondiente según el estado
+        if status == "infected":
+            infected_folder = '/var/www/html/viruscheck/infected/'
+            if not os.path.exists(infected_folder):
+                os.makedirs(infected_folder)
+
+            # Si es parte de una carpeta, mantener la estructura
+            if is_folder:
+                target_path = os.path.join(infected_folder, file_name)
+                os.makedirs(os.path.dirname(target_path), exist_ok=True)
             else:
-                location = UPLOAD_FOLDER
+                target_path = os.path.join(infected_folder, os.path.basename(file_name))
 
-            # Devolver la respuesta en formato JSON
-            print("Content-Type: application/json\n")
-            print(json.dumps({
-                "file_name": uploaded_file.filename,
-                "hash": file_hash,
-                "status": status,
-                "location": location
-            }))
+            os.rename(file_path, target_path)
+            location = infected_folder
+        elif status == "clean":
+            clean_folder = '/var/www/html/viruscheck/clean/'
+            if not os.path.exists(clean_folder):
+                os.makedirs(clean_folder)
 
-        except Exception as e:
-            print("Content-Type: application/json\n")
-            print(json.dumps({"error": f"Error al guardar el archivo: {str(e)}"}))
-    else:
-        print("Content-Type: application/json\n")
-        print(json.dumps({"error": "No se ha seleccionado un archivo."}))
+            # Si es parte de una carpeta, mantener la estructura
+            if is_folder:
+                target_path = os.path.join(clean_folder, file_name)
+                os.makedirs(os.path.dirname(target_path), exist_ok=True)
+            else:
+                target_path = os.path.join(clean_folder, os.path.basename(file_name))
+
+            os.rename(file_path, target_path)
+            location = clean_folder
+        else:
+            location = UPLOAD_FOLDER
+
+        # Devolver los resultados
+        return {
+            "file_name": file_name,
+            "hash": file_hash,
+            "status": status,
+            "location": location
+        }
+
+    except Exception as e:
+        return {"error": f"Error al procesar el archivo {file_name}: {str(e)}"}
+
+# Manejo principal
+def main():
+    print("Content-Type: application/json\n")
+
+    # Leer el formulario
+    form = cgi.FieldStorage()
+
+    # Comprobar si se ha recibido el archivo
+    if "file" not in form:
+        print(json.dumps({"error": "No se ha recibido ningún archivo."}))
+        return
+
+    # Determinar el modo (archivo individual o carpeta)
+    mode = form.getvalue("mode", "single")
+
+    if mode == "single":
+        # Procesar un archivo individual
+        file_item = form["file"]
+        if not file_item.filename:
+            print(json.dumps({"error": "No se ha seleccionado un archivo."}))
+            return
+
+        result = process_file(file_item)
+        print(json.dumps(result))
+
+    elif mode == "folder":
+        # Procesar un archivo como parte de una carpeta
+        file_item = form["file"]
+        if not file_item.filename:
+            print(json.dumps({"error": "No se ha seleccionado un archivo."}))
+            return
+
+        # Obtener la ruta relativa del archivo dentro de la carpeta
+        relative_path = form.getvalue("relativePath", file_item.filename)
+
+        result = process_file(file_item, relative_path, is_folder=True)
+        print(json.dumps(result))
+
+if __name__ == "__main__":
+    main()
