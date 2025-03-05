@@ -5,6 +5,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $correo = $_POST['correo'];
     $contraseña = $_POST['contraseña'];
 
+    // Conexión a la base de datos
     $conn = new mysqli('localhost', 'admin', 'FranPerez', 'usuarios');
 
     if ($conn->connect_error) {
@@ -12,22 +13,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     $conn->set_charset("utf8mb4");
 
-    // Actualizamos la consulta para recuperar también el departamento
+    // Consulta para obtener el usuario
     $stmt = $conn->prepare("SELECT id, nombre, contraseña, departamento FROM usuarios WHERE correo = ?");
     $stmt->bind_param("s", $correo);
     $stmt->execute();
     $stmt->store_result();
-    // Se agrego una variable para el departamento
     $stmt->bind_result($id, $nombre, $hashed_password, $departamento);
 
-    if ($stmt->fetch() && password_verify($contraseña, $hashed_password)) {
-        // Guarda el nombre y el departamento del usuario en la sesión
-        $_SESSION['username'] = $nombre;
-        $_SESSION['role'] = $departamento; // Ej: "administrador" o "cliente"
+    if ($stmt->fetch()) {
+        // Verificar la contraseña usando password_verify()
+        if (password_verify($contraseña, $hashed_password)) {
+            // Guardar el nombre y el departamento del usuario en la sesión
+            $_SESSION['username'] = $nombre;
+            $_SESSION['role'] = $departamento; // Ej: "administrador" o "cliente"
 
-        // Redirige a welcome.php (o a index.php si prefieres)
-        header("Location: welcome.php");
-        exit();
+            // Redirigir a welcome.php
+            header("Location: welcome.php");
+            exit();
+        } else {
+            echo "Correo o contraseña incorrectos.";
+        }
     } else {
         echo "Correo o contraseña incorrectos.";
     }
