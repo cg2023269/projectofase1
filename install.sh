@@ -138,13 +138,19 @@ CREATE DATABASE usuarios;
 USE usuarios;
 
 -- Tabla de usuarios
-CREATE TABLE usuarios (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(255) NOT NULL,
-    correo VARCHAR(255) NOT NULL UNIQUE,
-    contraseña VARCHAR(255) NOT NULL,
-    departamento VARCHAR(50)
-);
+
+CREATE TABLE `usuarios` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(255) NOT NULL,
+  `correo` varchar(255) NOT NULL,
+  `contraseña` varchar(255) NOT NULL,
+  `departamento` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `correo` (`correo`),
+  UNIQUE KEY `nombre` (`nombre`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+
+
 
 -- Tabla de archivos
 CREATE TABLE `archivos` (
