@@ -177,11 +177,14 @@ CREATE TABLE `archivos_compartidos` (
   CONSTRAINT `archivos_compartidos_ibfk_2` FOREIGN KEY (`usuario_destinatario`) REFERENCES `usuarios` (`nombre`),
   CONSTRAINT `archivos_compartidos_ibfk_3` FOREIGN KEY (`departamento_destinatario`) REFERENCES `departamentos` (`nombre`)
 ) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 -- Tabla de departamentos
-CREATE TABLE departamentos (
-    id INT(11) AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(50) NOT NULL
-);
+CREATE TABLE `departamentos` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `nombre` (`nombre`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
 
 -- Crear usuario de base de datos y asignar permisos
 CREATE USER 'admin'@'localhost' IDENTIFIED BY 'FranPerez';
