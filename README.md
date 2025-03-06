@@ -270,4 +270,5 @@ Asegúrate de que el archivo `index.php` esté en la carpeta correcta (`/var/www
 ## 🎉 ¡Listo!
 Siguiendo esta guía, deberías poder acceder y usar todas las funciones disponibles de la aplicación. 🚀
 
-Accede a la aplicación en: [http://localhost/viruscheck/](http://localhost/viruscheck/)
+Accede a la aplicación en: http://(IP DEL SERVIDOR)
+
