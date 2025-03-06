@@ -133,70 +133,81 @@ sudo systemctl restart apache2
 echo "Configurando MariaDB..."
 
 # Crear la base de datos y las tablas
+
+
+
+
+
+
 sudo mysql -u root <<EOF
 CREATE DATABASE usuarios;
 USE usuarios;
 
 -- Tabla de usuarios
-
-CREATE TABLE `usuarios` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(255) NOT NULL,
-  `correo` varchar(255) NOT NULL,
-  `contraseña` varchar(255) NOT NULL,
-  `departamento` varchar(50) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `correo` (`correo`),
-  UNIQUE KEY `nombre` (`nombre`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
-
-
-
--- Tabla de archivos
-CREATE TABLE `archivos` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `usuario` varchar(255) NOT NULL,
-  `file_name` varchar(255) NOT NULL,
-  `hash` varchar(64) NOT NULL,
-  `status` varchar(20) NOT NULL,
-  `location` varchar(255) NOT NULL,
-  `upload_time` timestamp NULL DEFAULT current_timestamp(),
-  `almacenado` enum('Sí','No') DEFAULT 'Sí',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
-
-
--- Tabla de archivos compartidos
-CREATE TABLE `archivos_compartidos` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `archivo_id` int(11) NOT NULL,
-  `usuario_destinatario` varchar(255) DEFAULT NULL,
-  `departamento_destinatario` varchar(50) DEFAULT NULL,
-  `compartido_por` varchar(255) NOT NULL,
-  `fecha_compartido` timestamp NULL DEFAULT current_timestamp(),
-  `estado` enum('Pendiente','Completado') NOT NULL DEFAULT 'Pendiente',
-  PRIMARY KEY (`id`),
-  KEY `archivo_id` (`archivo_id`),
-  KEY `usuario_destinatario` (`usuario_destinatario`),
-  KEY `departamento_destinatario` (`departamento_destinatario`),
-  CONSTRAINT `archivos_compartidos_ibfk_1` FOREIGN KEY (`archivo_id`) REFERENCES `archivos` (`id`),
-  CONSTRAINT `archivos_compartidos_ibfk_2` FOREIGN KEY (`usuario_destinatario`) REFERENCES `usuarios` (`nombre`),
-  CONSTRAINT `archivos_compartidos_ibfk_3` FOREIGN KEY (`departamento_destinatario`) REFERENCES `departamentos` (`nombre`)
-) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE usuarios (
+  id int(11) NOT NULL AUTO_INCREMENT,
+  nombre varchar(255) NOT NULL,
+  correo varchar(255) NOT NULL,
+  contraseña varchar(255) NOT NULL,
+  departamento varchar(50) DEFAULT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY correo (correo),
+  UNIQUE KEY nombre (nombre)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Tabla de departamentos
-CREATE TABLE `departamentos` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(50) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `nombre` (`nombre`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+CREATE TABLE departamentos (
+  id int(11) NOT NULL AUTO_INCREMENT,
+  nombre varchar(50) NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY nombre (nombre)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Tabla de archivos
+CREATE TABLE archivos (
+  id int(11) NOT NULL AUTO_INCREMENT,
+  usuario varchar(255) NOT NULL,
+  file_name varchar(255) NOT NULL,
+  hash varchar(64) NOT NULL,
+  status varchar(20) NOT NULL,
+  location varchar(255) NOT NULL,
+  upload_time timestamp NULL DEFAULT current_timestamp(),
+  almacenado enum('Sí','No') DEFAULT 'Sí',
+  PRIMARY KEY (id)
+) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Tabla de archivos compartidos
+CREATE TABLE archivos_compartidos (
+  id int(11) NOT NULL AUTO_INCREMENT,
+  archivo_id int(11) NOT NULL,
+  usuario_destinatario varchar(255) DEFAULT NULL,
+  departamento_destinatario varchar(50) DEFAULT NULL,
+  compartido_por varchar(255) NOT NULL,
+  fecha_compartido timestamp NULL DEFAULT current_timestamp(),
+  estado enum('Pendiente','Completado') NOT NULL DEFAULT 'Pendiente',
+  PRIMARY KEY (id),
+  KEY archivo_id (archivo_id),
+  KEY usuario_destinatario (usuario_destinatario),
+  KEY departamento_destinatario (departamento_destinatario),
+  CONSTRAINT archivos_compartidos_ibfk_1 FOREIGN KEY (archivo_id) REFERENCES archivos (id),
+  CONSTRAINT archivos_compartidos_ibfk_2 FOREIGN KEY (usuario_destinatario) REFERENCES usuarios (nombre),
+  CONSTRAINT archivos_compartidos_ibfk_3 FOREIGN KEY (departamento_destinatario) REFERENCES departamentos (nombre)
+) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Crear usuario de base de datos y asignar permisos
 CREATE USER 'admin'@'localhost' IDENTIFIED BY 'FranPerez';
 GRANT ALL PRIVILEGES ON usuarios.* TO 'admin'@'localhost';
 FLUSH PRIVILEGES;
 EOF
+
+
+
+
+
+
+
+
+
 
 # Asegurar la instalación de MariaDB
 echo "Asegurando la instalación de MariaDB..."
