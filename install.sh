@@ -159,16 +159,22 @@ CREATE TABLE archivos (
 );
 
 -- Tabla de archivos compartidos
-CREATE TABLE archivos_compartidos (
-    id INT(11) AUTO_INCREMENT PRIMARY KEY,
-    archivo_id INT(11) NOT NULL,
-    usuario_destinatario VARCHAR(255) NOT NULL,
-    departamento_destinatario VARCHAR(50) NOT NULL,
-    compartido_por VARCHAR(255) NOT NULL,
-    fecha_compartido TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    estado ENUM('Pendiente', 'Completado') DEFAULT 'Pendiente'
-);
-
+CREATE TABLE `archivos_compartidos` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `archivo_id` int(11) NOT NULL,
+  `usuario_destinatario` varchar(255) DEFAULT NULL,
+  `departamento_destinatario` varchar(50) DEFAULT NULL,
+  `compartido_por` varchar(255) NOT NULL,
+  `fecha_compartido` timestamp NULL DEFAULT current_timestamp(),
+  `estado` enum('Pendiente','Completado') NOT NULL DEFAULT 'Pendiente',
+  PRIMARY KEY (`id`),
+  KEY `archivo_id` (`archivo_id`),
+  KEY `usuario_destinatario` (`usuario_destinatario`),
+  KEY `departamento_destinatario` (`departamento_destinatario`),
+  CONSTRAINT `archivos_compartidos_ibfk_1` FOREIGN KEY (`archivo_id`) REFERENCES `archivos` (`id`),
+  CONSTRAINT `archivos_compartidos_ibfk_2` FOREIGN KEY (`usuario_destinatario`) REFERENCES `usuarios` (`nombre`),
+  CONSTRAINT `archivos_compartidos_ibfk_3` FOREIGN KEY (`departamento_destinatario`) REFERENCES `departamentos` (`nombre`)
+) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 -- Tabla de departamentos
 CREATE TABLE departamentos (
     id INT(11) AUTO_INCREMENT PRIMARY KEY,
