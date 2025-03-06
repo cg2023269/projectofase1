@@ -147,16 +147,18 @@ CREATE TABLE usuarios (
 );
 
 -- Tabla de archivos
-CREATE TABLE archivos (
-    id INT(11) AUTO_INCREMENT PRIMARY KEY,
-    usuario VARCHAR(255) NOT NULL,
-    file_name VARCHAR(255) NOT NULL,
-    hash VARCHAR(64) NOT NULL,
-    status VARCHAR(20) NOT NULL,
-    location VARCHAR(255) NOT NULL,
-    upload_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    almacenado ENUM('Sí', 'No') NOT NULL
-);
+CREATE TABLE `archivos` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `usuario` varchar(255) NOT NULL,
+  `file_name` varchar(255) NOT NULL,
+  `hash` varchar(64) NOT NULL,
+  `status` varchar(20) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `upload_time` timestamp NULL DEFAULT current_timestamp(),
+  `almacenado` enum('Sí','No') DEFAULT 'Sí',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+
 
 -- Tabla de archivos compartidos
 CREATE TABLE `archivos_compartidos` (
