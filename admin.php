@@ -14,7 +14,7 @@ if ($conn->connect_error) {
 }
 $conn->set_charset("utf8mb4");
 
-// Procesar acciones (actualizar usuario, agregar departamento, borrar departamento, eliminar usuario)
+// Procesar acciones
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
         switch ($_POST['action']) {
@@ -58,12 +58,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt->close();
                 }
                 break;
+
+            case 'validate_user':
+                $user_id = $_POST['user_id'] ?? '';
+                if ($user_id) {
+                    $stmt = $conn->prepare("UPDATE usuarios SET validado = TRUE WHERE id = ?");
+                    $stmt->bind_param("i", $user_id);
+                    $stmt->execute();
+                    $stmt->close();
+                }
+                break;
         }
     }
 }
 
 // Consultar la lista de usuarios
-$userResult = $conn->query("SELECT id, nombre, correo, departamento FROM usuarios ORDER BY id ASC");
+$userResult = $conn->query("SELECT id, nombre, correo, departamento, validado FROM usuarios ORDER BY id ASC");
 // Consultar la lista de departamentos
 $deptResult = $conn->query("SELECT id, nombre FROM departamentos ORDER BY nombre ASC");
 $departments = $deptResult->fetch_all(MYSQLI_ASSOC);
@@ -85,6 +95,8 @@ $deptResult->free();
       input[type="submit"], button { padding: 5px 10px; background-color: #34495e; color: #fff; border: none; cursor: pointer; }
       input[type="submit"]:hover, button:hover { background-color: #2c3e50; }
       a { text-decoration: none; color: #3498db; }
+      .validado { color: #27ae60; font-weight: bold; }
+      .no-validado { color: #e74c3c; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -96,6 +108,7 @@ $deptResult->free();
               <th>ID</th>
               <th>Nombre</th>
               <th>Correo</th>
+              <th>Estado</th>
               <th>Departamento Actual</th>
               <th>Asignar Departamento</th>
               <th>Acciones</th>
@@ -107,6 +120,9 @@ $deptResult->free();
               <td><?= $user['id'] ?></td>
               <td><?= htmlspecialchars($user['nombre']) ?></td>
               <td><?= htmlspecialchars($user['correo']) ?></td>
+              <td class="<?= $user['validado'] ? 'validado' : 'no-validado' ?>">
+                  <?= $user['validado'] ? 'Validado' : 'Pendiente' ?>
+              </td>
               <td><?= htmlspecialchars($user['departamento'] ?? '') ?></td>
               <td>
                   <form method="post" action="">
@@ -122,6 +138,13 @@ $deptResult->free();
                   </form>
               </td>
               <td>
+                  <?php if (!$user['validado']): ?>
+                      <form method="post" action="" style="margin-bottom: 5px;">
+                          <input type="hidden" name="action" value="validate_user">
+                          <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
+                          <input type="submit" value="Validar Usuario" style="background-color: #27ae60;">
+                      </form>
+                  <?php endif; ?>
                   <form method="post" action="" onsubmit="return confirm('¿Está seguro de eliminar este usuario?');">
                       <input type="hidden" name="action" value="delete_user">
                       <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
@@ -161,12 +184,11 @@ $deptResult->free();
           <?php endforeach; ?>
       </tbody>
   </table>
-<form action="index.php" method="get">
-    <button type="submit" style="padding: 10px 15px; background-color: #34495e; color: white; border: none; border-radius: 4px; cursor: pointer;">
-        Volver a la página principal
-    </button>
-</form>
-
+  <form action="index.php" method="get">
+      <button type="submit" style="padding: 10px 15px; background-color: #34495e; color: white; border: none; border-radius: 4px; cursor: pointer;">
+          Volver a la página principal
+      </button>
+  </form>
 </body>
 </html>
 <?php $userResult->free(); $conn->close(); ?>
