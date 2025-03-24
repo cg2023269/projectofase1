@@ -1,5 +1,5 @@
 <?php
-session_start(); // Inicia la sesión
+session_start();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nombre = $_POST['nombre'];
@@ -13,18 +13,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     $conn->set_charset("utf8mb4");
 
-    $stmt = $conn->prepare("INSERT INTO usuarios (nombre, correo, contraseña) VALUES (?, ?, ?)");
+    // Insertar usuario con validado=FALSE por defecto
+    $stmt = $conn->prepare("INSERT INTO usuarios (nombre, correo, contraseña, validado) VALUES (?, ?, ?, FALSE)");
     $stmt->bind_param("sss", $nombre, $correo, $contraseña);
 
     if ($stmt->execute()) {
-        // Guarda el nombre del usuario en la sesión
-        $_SESSION['username'] = $nombre;
-
-        // Redirige a welcome.php
-        header("Location: welcome.php");
-        exit();
+        $mensaje = "¡Registro exitoso! Un administrador revisará tu solicitud y se te validará";
     } else {
-        echo "Error: " . $stmt->error;
+        $mensaje = "Error: " . $stmt->error;
     }
 
     $stmt->close();
@@ -121,21 +117,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
     <div class="register-container">
         <h2>Registro</h2>
-        <form method="post" action="">
-            <div class="input-group">
-                <label for="nombre">Nombre</label>
-                <input type="text" id="nombre" name="nombre" placeholder="Ingrese su nombre" required>
+        <?php if (isset($mensaje)): ?>
+            <div style="margin-bottom: 20px; padding: 10px; background: #d4edda; color: #155724; border-radius: 4px;">
+                <?= $mensaje ?>
             </div>
-            <div class="input-group">
-                <label for="correo">Correo</label>
-                <input type="email" id="correo" name="correo" placeholder="Ingrese su correo" required>
-            </div>
-            <div class="input-group">
-                <label for="contraseña">Contraseña</label>
-                <input type="password" id="contraseña" name="contraseña" placeholder="Ingrese su contraseña" required>
-            </div>
-            <button type="submit" class="register-btn">Registrarse</button>
-        </form>
+            <a href="../index.php" style="display: inline-block; margin-top: 10px; color: #3498db;">Volver al inicio</a>
+        <?php else: ?>
+            <form method="post" action="">
+                <div class="input-group">
+                    <label for="nombre">Nombre</label>
+                    <input type="text" id="nombre" name="nombre" placeholder="Ingrese su nombre" required>
+                </div>
+                <div class="input-group">
+                    <label for="correo">Correo</label>
+                    <input type="email" id="correo" name="correo" placeholder="Ingrese su correo" required>
+                </div>
+                <div class="input-group">
+                    <label for="contraseña">Contraseña</label>
+                    <input type="password" id="contraseña" name="contraseña" placeholder="Ingrese su contraseña" required>
+                </div>
+                <button type="submit" class="register-btn">Registrarse</button>
+            </form>
+            <p style="margin-top: 15px; font-size: 14px; color: #7f8c8d;">
+                Después de registrarte, un administrador revisará tu solicitud y te validará.
+            </p>
+        <?php endif; ?>
     </div>
 </body>
 </html>
