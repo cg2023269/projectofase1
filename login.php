@@ -14,27 +14,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $conn->set_charset("utf8mb4");
 
     // Consulta para obtener el usuario
-    $stmt = $conn->prepare("SELECT id, nombre, contraseña, departamento FROM usuarios WHERE correo = ?");
+    $stmt = $conn->prepare("SELECT id, nombre, contraseña, departamento, validado FROM usuarios WHERE correo = ?");
     $stmt->bind_param("s", $correo);
     $stmt->execute();
     $stmt->store_result();
-    $stmt->bind_result($id, $nombre, $hashed_password, $departamento);
+    $stmt->bind_result($id, $nombre, $hashed_password, $departamento, $validado);
 
     if ($stmt->fetch()) {
-        // Verificar la contraseña usando password_verify()
+        // Verificar la contraseña
         if (password_verify($contraseña, $hashed_password)) {
-            // Guardar el nombre y el departamento del usuario en la sesión
-            $_SESSION['username'] = $nombre;
-            $_SESSION['role'] = $departamento; // Ej: "administrador" o "cliente"
-
-            // Redirigir a welcome.php
-            header("Location: welcome.php");
-            exit();
+            // Verificar si el usuario está validado
+            if ($validado) {
+                $_SESSION['username'] = $nombre;
+                $_SESSION['role'] = $departamento;
+                header("Location: welcome.php");
+                exit();
+            } else {
+                $error = "Tu cuenta aún no ha sido validada por un administrador. Por favor, espera la confirmación.";
+            }
         } else {
-            echo "Correo o contraseña incorrectos.";
+            $error = "Correo o contraseña incorrectos.";
         }
     } else {
-        echo "Correo o contraseña incorrectos.";
+        $error = "Correo o contraseña incorrectos.";
     }
 
     $stmt->close();
@@ -131,6 +133,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
     <div class="login-container">
         <h2>Iniciar Sesión</h2>
+        <?php if (isset($error)): ?>
+            <div style="margin-bottom: 20px; padding: 10px; background: #f8d7da; color: #721c24; border-radius: 4px;">
+                <?= $error ?>
+            </div>
+        <?php endif; ?>
         <form method="post" action="">
             <div class="input-group">
                 <label for="correo">Correo</label>
@@ -142,6 +149,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
             <button type="submit" class="login-btn">Iniciar Sesión</button>
         </form>
+        <p style="margin-top: 15px; font-size: 14px; color: #7f8c8d;">
+            ¿No tienes una cuenta? <a href="register.php">Regístrate aquí</a>
+        </p>
     </div>
 </body>
 </html>
