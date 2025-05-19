@@ -33,6 +33,20 @@ $stmt_share->bind_param("s", $usuario);
 $stmt_share->execute();
 $result_share = $stmt_share->get_result();
 
+// Obtener la lista de usuarios y departamentos
+$usuarios = [];
+$departamentos = [];
+
+$result_usuarios = $conn->query("SELECT nombre FROM usuarios");
+while ($row = $result_usuarios->fetch_assoc()) {
+    $usuarios[] = $row['nombre'];
+}
+
+$result_departamentos = $conn->query("SELECT nombre FROM departamentos");
+while ($row = $result_departamentos->fetch_assoc()) {
+    $departamentos[] = $row['nombre'];
+}
+
 // Manejar el formulario de compartir archivo
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['compartir'])) {
     $archivo_id = $_POST['archivo_id'];
@@ -231,9 +245,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['eliminar_compartido'])
         <form method="post" action="registro.php">
             <input type="hidden" id="archivo_id" name="archivo_id">
             <label for="usuario_destinatario">Usuario destinatario:</label>
-            <input type="text" id="usuario_destinatario" name="usuario_destinatario" placeholder="Usuario destinatario">            <br><br>
+            <select id="usuario_destinatario" name="usuario_destinatario">
+                <option value="">Seleccione un usuario</option>
+                <?php foreach ($usuarios as $usuario): ?>
+                    <option value="<?php echo htmlspecialchars($usuario); ?>"><?php echo htmlspecialchars($usuario); ?></option>
+                <?php endforeach; ?>
+            </select>
+            <br><br>
             <label for="departamento_destinatario">Departamento destinatario:</label>
-            <input type="text" id="departamento_destinatario" name="departamento_destinatario" placeholder="Departamento destinatario">
+            <select id="departamento_destinatario" name="departamento_destinatario">
+                <option value="">Seleccione un departamento</option>
+                <?php foreach ($departamentos as $departamento): ?>
+                    <option value="<?php echo htmlspecialchars($departamento); ?>"><?php echo htmlspecialchars($departamento); ?></option>
+                <?php endforeach; ?>
+            </select>
             <br><br>
             <input type="submit" name="compartir" value="Compartir" class="button">
             <button type="button" onclick="closePopup()">Cerrar</button>
