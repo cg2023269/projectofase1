@@ -10,6 +10,14 @@ sudo apt update && sudo apt upgrade -y
 echo "Instalando Apache2, PHP y MariaDB..."
 sudo apt install apache2 php libapache2-mod-php mariadb-server php-mysql -y
 
+# Instalar dependencias de Python y pip
+echo "Instalando dependencias de Python..."
+sudo apt install python3 python3-pip python3-dev -y
+
+# Instalar paquetes de Python necesarios para check_file.py
+echo "Instalando paquetes de Python necesarios..."
+sudo pip3 install cryptography requests
+
 # Habilitar el módulo CGI de Apache2
 echo "Habilitando el módulo CGI..."
 sudo a2enmod cgi
@@ -66,15 +74,6 @@ sudo cp share.php /var/www/html/viruscheck/
 
 # Asignar permisos al script CGI
 sudo chmod +x /var/www/html/viruscheck/cgi-bin/check_file.py
-
-# Instalar pipx
-echo "Instalando pipx..."
-sudo apt install pipx -y
-pipx ensurepath
-
-# Instalar requests con pipx
-echo "Instalando requests con pipx..."
-pipx install requests
 
 # Configurar Apache2 para permitir la ejecución de scripts CGI
 echo "Configurando Apache2 para CGI..."
@@ -133,12 +132,6 @@ sudo systemctl restart apache2
 echo "Configurando MariaDB..."
 
 # Crear la base de datos y las tablas
-
-
-
-
-
-
 sudo mysql -u root <<EOF
 CREATE DATABASE usuarios;
 USE usuarios;
@@ -199,15 +192,6 @@ CREATE USER 'admin'@'localhost' IDENTIFIED BY 'FranPerez';
 GRANT ALL PRIVILEGES ON usuarios.* TO 'admin'@'localhost';
 FLUSH PRIVILEGES;
 EOF
-
-
-
-
-
-
-
-
-
 
 # Asegurar la instalación de MariaDB
 echo "Asegurando la instalación de MariaDB..."
